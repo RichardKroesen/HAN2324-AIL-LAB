@@ -1,0 +1,10 @@
+add_library(ASYNC_UART INTERFACE)
+
+target_include_directories(ASYNC_UART INTERFACE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+)
+
+target_link_libraries(ASYNC_UART INTERFACE   
+    pico_stdlib  
+    hardware_uart
+)
