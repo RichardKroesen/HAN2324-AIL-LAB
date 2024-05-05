@@ -39,7 +39,7 @@
  * consists of FreeRTOS heap, linker heap and also .bss etc. Thus
  * FreeRTOS heap cannot take the entire 16kB.
  */
-#define configTOTAL_HEAP_SIZE			         (  ( size_t ) ( 8 * 1024 ) )
+#define configTOTAL_HEAP_SIZE			         (  ( size_t ) ( 32 * 1024 ) )
 
 #define configUSE_PREEMPTION                    1           // Allow tasks to be pre-empted
 #define configUSE_TIME_SLICING                  1           // Allow FreeRTOS to switch tasks at each tick

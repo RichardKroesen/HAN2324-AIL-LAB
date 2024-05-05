@@ -7,6 +7,20 @@ include(pico_sdk_import.cmake)
 include(FetchContent)
 
 FetchContent_Declare(
+    Universal_hal
+    GIT_REPOSITORY https://github.com/Hoog-V/Universal_hal
+    GIT_TAG stable
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/Universal_hal
+)
+
+FetchContent_Declare(
+    Manikin_Software_Libaries_V2
+    GIT_REPOSITORY https://github.com/RobotPatient/Manikin_Software_Libraries_V2.git
+    GIT_TAG main
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/Manikin_Software_Libaries_V2
+)
+
+FetchContent_Declare(
   FreeRTOS
   GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel
   GIT_TAG        V11.0.1
@@ -31,8 +45,6 @@ add_compile_options(-Wall
         -Wno-maybe-uninitialized
 )
 
-add_subdirectory(async_uart)
-
 if (PICO_CYW43_SUPPORTED) # set by BOARD=pico-w
     if (NOT TARGET pico_cyw43_arch)
         message("Skipping build as support is not available")
@@ -44,7 +56,6 @@ if (PICO_CYW43_SUPPORTED) # set by BOARD=pico-w
 
         target_include_directories(thumbs_track_module_eai PUBLIC
             ${CMAKE_CURRENT_LIST_DIR}/src
-            ${CMAKE_CURRENT_LIST_DIR}/async_uart
         )
 
         # Select the heap port.  values between 1-4 will pick a heap.
@@ -57,13 +68,19 @@ if (PICO_CYW43_SUPPORTED) # set by BOARD=pico-w
         FetchContent_MakeAvailable(FreeRTOS)
         target_include_directories(freertos_config INTERFACE "config/")
 
+        add_library(FreeRTOS ALIAS freertos_kernel)
+        set(PLATFORM_DEFINED PICO)
+        FetchContent_MakeAvailable(Universal_hal)
+        FetchContent_MakeAvailable(Manikin_Software_Libaries_V2)
+
         target_link_libraries(thumbs_track_module_eai pico_cyw43_arch_lwip_poll
             pico_stdlib
             pico_lwip_mbedtls
             pico_mbedtls
             freertos_kernel
             freertos_config
-            ASYNC_UART
+            Universal_hal
+            sensor_fingerposition
         )
 
         pico_add_extra_outputs(thumbs_track_module_eai)
