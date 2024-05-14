@@ -11,12 +11,13 @@
 #include <hal_i2c_host.h>
 #include <i2c_helper.hpp>
 #include <sensor_fingerposition.hpp>
+#include <sensor_compression.hpp>
 
 inline constexpr uint8_t I2C_SDA_PIN=0;
 inline constexpr uint8_t I2C_SCL_PIN=1;
 inline constexpr long I2C_SPEED=100e3;
 
-inline constexpr uint16_t SAMPLE_RATE_MS=100;
+inline constexpr uint16_t SAMPLE_RATE_MS=10;
 
 void error_handler()
 {
@@ -40,6 +41,10 @@ void uart_send_task(void *params)
     i2c_host_init(I2C_PERIPHERAL_0, I2C_CLK_SOURCE_USE_DEFAULT, configCPU_CLOCK_HZ, I2C_SPEED, I2C_EXTRA_OPT_NONE);
     I2CDriver Driver(I2C_PERIPHERAL_0, kI2cSpeed_100KHz);
 
+    CompressionSensor tofpos;
+    I2CDriver tofDriver(I2C_PERIPHERAL_0, kI2cSpeed_100KHz);
+    tofpos.Initialize(&tofDriver);
+
     fpos.Initialize(&Driver);
     const TickType_t xFrequency = SAMPLE_RATE_MS / portTICK_PERIOD_MS; // Convert 100ms to ticks
 
@@ -49,18 +54,14 @@ void uart_send_task(void *params)
     {
         ms1 = xTaskGetTickCount();
         SensorData_t data = fpos.GetSensorData();
+        SensorData_t datatof = tofpos.GetSensorData();
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
         ms2 = xTaskGetTickCount();
-        printf("%d,%d,%d,%d,%d,%d,%d,%d,%d\n", ms1,
-               ms2,
-               data.buffer[0],
-               data.buffer[1],
-               data.buffer[2],
-               data.buffer[3],
-               data.buffer[4],
-               data.buffer[5],
-               data.buffer[6],
-               data.buffer[7]);
+        printf("%d,%d,", ms1, ms2);
+        for(uint8_t i =0; i< 8; i++) {
+            printf("%d,", data.buffer[i]);
+        }
+        printf("%d\n", datatof.buffer[0]);
     }
 }
 

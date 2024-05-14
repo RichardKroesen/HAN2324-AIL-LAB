@@ -81,6 +81,7 @@ if (PICO_CYW43_SUPPORTED) # set by BOARD=pico-w
             freertos_config
             Universal_hal
             sensor_fingerposition
+            sensor_compression
         )
 
         pico_add_extra_outputs(thumbs_track_module_eai)
